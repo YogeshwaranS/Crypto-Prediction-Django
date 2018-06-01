@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <!-- HighCharts -->
+    <script src="http://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/highcharts-more.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <script>
+        $(document).ready(function () {
+            set_img_data({{ file }})
+        });
+
+    </script>
+    <script type='text/javascript'>
+        function base64Encode(str) {
+            var CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+            var out = "", i = 0, len = str.length, c1, c2, c3;
+            while (i < len) {
+                c1 = str.charCodeAt(i++) & 0xff;
+                if (i == len) {
+                    out += CHARS.charAt(c1 >> 2);
+                    out += CHARS.charAt((c1 & 0x3) << 4);
+                    out += "==";
+                    break;
+                }
+                c2 = str.charCodeAt(i++);
+                if (i == len) {
+                    out += CHARS.charAt(c1 >> 2);
+                    out += CHARS.charAt(((c1 & 0x3) << 4) | ((c2 & 0xF0) >> 4));
+                    out += CHARS.charAt((c2 & 0xF) << 2);
+                    out += "=";
+                    break;
+                }
+                c3 = str.charCodeAt(i++);
+                out += CHARS.charAt(c1 >> 2);
+                out += CHARS.charAt(((c1 & 0x3) << 4) | ((c2 & 0xF0) >> 4));
+                out += CHARS.charAt(((c2 & 0xF) << 2) | ((c3 & 0xC0) >> 6));
+                out += CHARS.charAt(c3 & 0x3F);
+            }
+            return out;
+        }
+        function set_img_data(data) {
+            $("#graph_img").attr('src', 'data:image/png;base64,' + base64Encode(data));
+        }
+
+
+    </script>
+</head>
+<body>
+<img id="graph_img" src="#" alt="W3Schools.com">
+</body>
+</html>

@@ -1,0 +1,265 @@
+{#{% extends "checkbonds/base.html" %}#}
+
+{% block content %}
+    <head>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+        <!-- HighCharts -->
+        <script src="http://code.highcharts.com/highcharts.js"></script>
+        <script src="https://code.highcharts.com/highcharts-more.js"></script>
+        <script src="https://code.highcharts.com/modules/exporting.js"></script>
+        <script>
+            var isLoading = false
+            $(document)
+                .ajaxStart(function () {
+{#                    $loading.show();#}
+                    isLoading = true;
+{#                    alert(isLoading)#}
+                })
+                .ajaxStop(function () {
+                    isLoading = false;
+{#                    alert(isLoading)#}
+                });
+            $(document).ready(function () {
+                {#                alert("js")#}
+                $("#downloading_msg").hide()
+                $("#graph_img").hide()
+                $("#download_btn").click(function () {
+{#                    alert("clicked")#}
+                    $("#downloading_msg").show()
+                    $.ajax({
+                        url: "{% url 'download_latest_data' %}",
+                        type: "POST",
+                        data: {"s": "s"},
+                        success: function (response) {
+                            responce_json = JSON.parse(response);
+                            location.reload();
+                        },
+                        error: function (xhr, status, error) {
+                            var err = eval("(" + xhr.responseText + ")");
+                            alert("Error: " + xhr.responseText);
+                        }
+                    });
+                });
+                {#                $('#graph_id').highcharts({#}
+                {##}
+                {#                    title: {#}
+                {#                        text: 'Prediction Graph'#}
+                {#                    },#}
+                {##}
+                {#                    subtitle: {#}
+                {#                        text: ''#}
+                {#                    },#}
+                {##}
+                {#                    yAxis: {#}
+                {#                        title: {#}
+                {#                            text: 'Value'#}
+                {#                        }#}
+                {#                    },#}
+                {#                    legend: {#}
+                {#                        layout: 'vertical',#}
+                {#                        align: 'right',#}
+                {#                        verticalAlign: 'middle'#}
+                {#                    },#}
+                {#                    xAxis: {#}
+                {#                        categories: []#}
+                {#                    },#}
+                {#                    series: [{#}
+                {#                        name: 'Actual',#}
+                {#                        data: []#}
+                {#                    }, {#}
+                {#                        name: 'Predicted',#}
+                {#                        data: []#}
+                {#                    }],#}
+                {##}
+                {#                    responsive: {#}
+                {#                        rules: [{#}
+                {#                            condition: {#}
+                {#                                maxWidth: 500#}
+                {#                            },#}
+                {#                            chartOptions: {#}
+                {#                                legend: {#}
+                {#                                    layout: 'horizontal',#}
+                {#                                    align: 'center',#}
+                {#                                    verticalAlign: 'bottom'#}
+                {#                                }#}
+                {#                            }#}
+                {#                        }]#}
+                {#                    }#}
+                {##}
+                {#                });#}
+
+            });
+
+        </script>
+        <script type='text/javascript'>
+            function graph_link_clicked(name) {
+                if(isLoading == true)
+                    return;
+{#                alert("graph link oass: "+isLoading)#}
+                {#                $.ajax({#}
+                {#                    url: "{% url 'generate_high_chart_graph' %}",#}
+                {#                    data: $('#info_form').serialize(),#}
+                {#                    type: "POST",#}
+                {#                    data: {'csrfmiddlewaretoken': '', 'name': name},#}
+                {#                    success: function (response) {#}
+                {#                        $('#all_graphs').show();#}
+                {#                        var response_json = JSON.parse(response);#}
+                {#                        $('#graph_id').highcharts({#}
+                {##}
+                {#                            title: {#}
+                {#                                text: 'Prediction Graph'#}
+                {#                            },#}
+                {##}
+                {#                            subtitle: {#}
+                {#                                text: 'File Name: ' + name#}
+                {#                            },#}
+                {##}
+                {#                            yAxis: {#}
+                {#                                title: {#}
+                {#                                    text: 'Value'#}
+                {#                                }#}
+                {#                            },#}
+                {#                            legend: {#}
+                {#                                layout: 'vertical',#}
+                {#                                align: 'right',#}
+                {#                                verticalAlign: 'middle'#}
+                {#                            },#}
+                {#                            xAxis: {#}
+                {#                                categories: response_json['x-axis-labels']#}
+                {#                            },#}
+                {#                            series: [{#}
+                {#                                name: 'Predicted',#}
+                {#                                data: response_json['prediction-data']#}
+                {#                            }, {#}
+                {#                                name: 'Actual',#}
+                {#                                data: response_json['actual-data']#}
+                {#                            }],#}
+                {##}
+                {##}
+                {#                        });#}
+                {#                    }#}
+                {#                });#}
+                $.ajax({
+                    url: "{% url 'generate_graph' %}",
+                    type: "POST",
+                    data: {"name": name},
+                    mimeType: "text/plain; charset=x-user-defined",
+                    success: function (response) {
+                        $("#graph_img").show()
+                        {#                        alert(response)#}
+                        {#                        $("#graph_img").attr("src", response.pictureUrl);#}
+                        $("#graph_img").attr('src', 'data:image/png;base64,' + base64Encode(response));
+                    },
+                    error: function (xhr, status, error) {
+                        {#                        var err = eval("(" + xhr.responseText + ")");#}
+                        {#                        alert("Error: " + xhr.responseText);#}
+                    }
+                })
+                {#                .done(function (data, textStatus, jqXHR) {#}
+                {#                    alert(data)#}
+                {#                    $("#image").attr('src', 'data:image/png;base64,' + base64encode(data));#}
+                {#                });#}
+                function base64Encode(str) {
+                    var CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+                    var out = "", i = 0, len = str.length, c1, c2, c3;
+                    while (i < len) {
+                        c1 = str.charCodeAt(i++) & 0xff;
+                        if (i == len) {
+                            out += CHARS.charAt(c1 >> 2);
+                            out += CHARS.charAt((c1 & 0x3) << 4);
+                            out += "==";
+                            break;
+                        }
+                        c2 = str.charCodeAt(i++);
+                        if (i == len) {
+                            out += CHARS.charAt(c1 >> 2);
+                            out += CHARS.charAt(((c1 & 0x3) << 4) | ((c2 & 0xF0) >> 4));
+                            out += CHARS.charAt((c2 & 0xF) << 2);
+                            out += "=";
+                            break;
+                        }
+                        c3 = str.charCodeAt(i++);
+                        out += CHARS.charAt(c1 >> 2);
+                        out += CHARS.charAt(((c1 & 0x3) << 4) | ((c2 & 0xF0) >> 4));
+                        out += CHARS.charAt(((c2 & 0xF) << 2) | ((c3 & 0xC0) >> 6));
+                        out += CHARS.charAt(c3 & 0x3F);
+                    }
+                    return out;
+                }
+            }
+        </script>
+    </head>
+    <input type="button" id="download_btn" name="Download" value="Download Content">
+    <h4 id="downloading_msg">Data is downloading be patient page will reload automatically. Don't close the Page</h4>
+    <br>
+    <table border="0">
+        <tr>
+
+            <td>
+                <img id="graph_img" src="#" >
+                {#                <div id="graph_id" class="graph"></div>#}
+            </td>
+        </tr>
+        <tr>
+            <td width="30%">
+                <ul>
+                    {% for file in graph_files_list %}
+                        <li>
+                            <a class="graph_item" href="javascript:;"
+                               onclick="graph_link_clicked('{{ file }}');">{{ file }}</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </td>
+        </tr>
+    </table>
+    <div style="width: 30%">
+
+    </div>
+    <div style="width: 100%">
+
+    </div>
+
+    {#    {% if available_domination_name and first_item_draws_dic %}#}
+    {##}
+    {#        <select name="select_denominations" id="denomination_select">#}
+    {#            {% for key,value in available_domination_name.items %}#}
+    {#                <option value={{ key }}>{{ value }} </option>#}
+    {#            {% endfor %}#}
+    {#        </select>#}
+    {##}
+    {#        <select name="select_draw" id="select_draw">#}
+    {#            {% for key,value in first_item_draws_dic.items %}#}
+    {#                <option value={{ key }}>{{ value }}</option>#}
+    {#            {% endfor %}#}
+    {#        </select>#}
+    {##}
+    {#    {% else %}#}
+    {#        <p>No draws are available.</p>#}
+    {#    {% endif %}#}
+    {#    {% for choice in question.choice_set.all %}#}
+    {#        <input type="radio" name="choice" id="choice{{ forloop.counter }}" value="{{ choice.id }}"/>#}
+    {#        <label for="choice{{ forloop.counter }}">{{ choice.choice_text }}</label><br/>#}
+    {#    {% endfor %}#}
+    {#    <br>#}
+    {#    <br>#}
+    {#    <textarea style="width: 70%;height: 6%;resize: none;" id="bond_numbers_id" name="bond_number"#}
+    {#              placeholder="Enter your bond numbers here..... EXAMPLE: 123455,556879,445632,122354"></textarea>#}
+    {#    <br>#}
+    {#    <input  class="button button1" style="width: 70%;height: 6%" id="search_draw_button" type="submit"#}
+    {#           value="Search Draw" />#}
+    {#</form>#}
+    {#    <br>#}
+    {#    <br>#}
+    {#    <table style="width: 100%;" id="result_table">#}
+    {#        <tr>#}
+    {#            <th>PRIZE CATEGORY</th>#}
+    {#            <th>PRIZE AMOUNT</th>#}
+    {#            <th>PRIZE BOND NUMBER</th>#}
+    {#            <th>DRAW PLACE</th>#}
+    {#            <th>DRAW NO</th>#}
+    {#            <th>DRAW DATE</th>#}
+    {#        </tr>#}
+    {#    </table>#}
+    {#    <h4 id="error_lbl" style="color: darkred">*Errors and omissions are expected</h4>#}
+{% endblock %}
